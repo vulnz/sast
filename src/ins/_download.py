@@ -88,10 +88,24 @@ def _version_marker() -> str:
 
 
 def _http_get(url: str, *, binary: bool) -> bytes:
+    import ssl
+
     req = urllib.request.Request(url, headers={"User-Agent": _USER_AGENT})
     try:
         with urllib.request.urlopen(req, timeout=120) as resp:  # noqa: S310 (https only by default)
             return resp.read()
+    except ssl.SSLCertVerificationError as exc:
+        hint = ""
+        if platform.system().lower() == "darwin":
+            # Classic python.org-build issue: the bundled OpenSSL has no CA store
+            # until the user runs the post-install "Install Certificates.command".
+            hint = (
+                "\nOn macOS this usually means your Python install has no CA "
+                "certificates. Run:\n"
+                '  /Applications/Python\\ 3.x/Install\\ Certificates.command\n'
+                "or:  pip install --upgrade certifi"
+            )
+        raise DownloadError(f"TLS certificate verification failed for {url}: {exc}{hint}") from exc
     except Exception as exc:  # urllib raises a zoo of exception types
         raise DownloadError(f"Could not fetch {url}: {exc}") from exc
 
