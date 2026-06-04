@@ -1,0 +1,46 @@
+# ins — pip launcher for the Insomnia SAST engine.
+#
+# This package contains ONLY a tiny pure-Python launcher (zero runtime deps).
+# `pip install ins` does not download the engine; the self-contained SAST
+# binary is fetched on first run from insom.ai, matched to the host OS,
+# checksum-verified and cached. This keeps the wheel a few KB and lets new
+# engine builds ship without republishing to PyPI.
+#
+# Build a wheel:   python -m build
+# Install local:   pip install -e .
+
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ins"
+version = "0.1.0"
+description = "ins — free, fast static application security testing for CI/CD. Installs a self-contained SAST engine (17+ languages, taint tracking, secrets, IaC, SCA; HTML/JSON/SARIF) on first run."
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "Proprietary" }
+authors = [{ name = "CQR Cybersecurity LLC" }]
+keywords = ["sast", "security", "static-analysis", "sca", "sarif", "ci", "devsecops"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Topic :: Security",
+    "Topic :: Software Development :: Quality Assurance",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+]
+dependencies = []  # pure stdlib launcher — no third-party runtime deps
+
+[project.urls]
+Homepage = "https://insom.ai"
+
+[project.scripts]
+ins = "ins.cli:main"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
