@@ -6,4 +6,4 @@ from insom.ai, matched to your OS, checksum-verified, and cached. Subsequent
 runs exec the cached binary directly.
 """
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"

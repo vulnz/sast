@@ -29,7 +29,9 @@ import urllib.request
 from urllib.parse import urljoin
 
 # Override with the SAST_MANIFEST_URL env var (handy for staging / self-hosting).
-DEFAULT_MANIFEST_URL = "https://insom.ai/static/downloads/sast/manifest.json"
+# This is the manifest insom.ai already publishes; its `sast` section lists the
+# latest per-OS engine build (filename + sha256 + version).
+DEFAULT_MANIFEST_URL = "https://insom.ai/static/downloads/plugin_manifest.json"
 
 _USER_AGENT = "sast-launcher"
 
@@ -159,9 +161,44 @@ def _load_manifest() -> dict:
         data = json.loads(raw.decode("utf-8"))
     except Exception as exc:
         raise DownloadError(f"Manifest at {manifest_url()} is not valid JSON: {exc}") from exc
-    if not isinstance(data, dict) or "platforms" not in data:
-        raise DownloadError("Manifest is missing the required 'platforms' object.")
+    if not isinstance(data, dict) or not (data.get("platforms") or data.get("sast")):
+        raise DownloadError("Manifest has neither a 'sast' nor a 'platforms' section.")
     return data
+
+
+def _resolve_entry(manifest: dict, plat: str, murl: str) -> dict:
+    """Return {url, sha256, identity} for `plat`, handling both manifest shapes.
+
+    * insom.ai `plugin_manifest.json`:  {"sast": {"<plat>": {filename, sha256, version, uploaded}}}
+    * clean schema:                     {"version": ..., "platforms": {"<plat>": {url, sha256}}}
+    """
+    # Clean schema (url-based) takes precedence if present.
+    plats = manifest.get("platforms")
+    if isinstance(plats, dict) and isinstance(plats.get(plat), dict):
+        e = plats[plat]
+        if e.get("url"):
+            return {
+                "url": urljoin(murl, e["url"]),
+                "sha256": e.get("sha256"),
+                "identity": (e.get("version") or manifest.get("version") or ""),
+            }
+
+    # insom.ai plugin_manifest.json (filename-based).
+    sast = manifest.get("sast")
+    if isinstance(sast, dict):
+        if plat in sast:
+            e = sast[plat]
+            if not e:
+                raise DownloadError(
+                    f"No {plat} SAST engine build is available on insom.ai yet."
+                )
+            fn = e.get("filename") or e.get("url")
+            if not fn:
+                raise DownloadError(f"Manifest entry for {plat} has no filename/url.")
+            ident = f"{e.get('version', '')}|{e.get('uploaded', '')}"
+            return {"url": urljoin(murl, fn), "sha256": e.get("sha256"), "identity": ident}
+
+    raise DownloadError(f"Manifest has no download entry for platform {plat!r}.")
 
 
 def _verify_sha256(blob: bytes, expected: str) -> None:
@@ -196,6 +233,7 @@ def ensure_binary(*, force: bool = False, quiet: bool = False) -> str:
     path = binary_path()
     exists = os.path.exists(path)
 
+    plat = detect_platform()
     manifest = None
     if exists and not force:
         if not _update_check_due():
@@ -203,14 +241,14 @@ def ensure_binary(*, force: bool = False, quiet: bool = False) -> str:
         # An update check is due — see whether insom.ai has a newer build.
         try:
             manifest = _load_manifest()
+            entry = _resolve_entry(manifest, plat, manifest_url())
         except DownloadError:
-            _mark_checked()  # offline / server down: keep using the cached binary
+            _mark_checked()  # offline / server down / no build: keep cached binary
             return path
         _mark_checked()
-        latest = manifest.get("version") or ""
-        if latest == (current_version() or ""):
+        if entry["identity"] == (current_version() or ""):
             return path  # already on the latest
-        _warn(quiet, f"sast: newer engine available ({latest}); updating...")
+        _warn(quiet, f"sast: newer engine available ({entry['identity']}); updating...")
 
     if not _arch_is_supported():
         _warn(
@@ -219,18 +257,13 @@ def ensure_binary(*, force: bool = False, quiet: bool = False) -> str:
             "attempting the x86-64 binary.",
         )
 
-    plat = detect_platform()
     if manifest is None:
         _warn(quiet, "sast: fetching the SAST engine (first run)..." if not force
               else "sast: updating the SAST engine...")
         manifest = _load_manifest()
+        entry = _resolve_entry(manifest, plat, manifest_url())
 
-    entry = manifest.get("platforms", {}).get(plat)
-    if not entry or not entry.get("url"):
-        raise DownloadError(f"Manifest has no download entry for platform {plat!r}.")
-
-    url = urljoin(manifest_url(), entry["url"])
-    blob = _http_get(url, binary=True)
+    blob = _http_get(entry["url"], binary=True)
 
     sha = entry.get("sha256")
     if sha:
@@ -247,15 +280,15 @@ def ensure_binary(*, force: bool = False, quiet: bool = False) -> str:
         os.chmod(tmp, mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
     os.replace(tmp, path)
 
-    version = manifest.get("version", "")
+    identity = entry.get("identity") or ""
     try:
         with open(_version_marker(), "w", encoding="utf-8") as fh:
-            fh.write(version)
+            fh.write(identity)
     except OSError:
         pass
     _mark_checked()
 
-    _warn(quiet, f"sast: installed engine {version or '(unversioned)'} -> {path}")
+    _warn(quiet, f"sast: installed engine {identity or '(unversioned)'} -> {path}")
     return path
 
 

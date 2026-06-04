@@ -17,6 +17,38 @@ sast --help            # full engine options
 > Supports Linux, macOS and Windows (x86-64). On Apple Silicon the macOS
 > binary runs under Rosetta.
 
+## Installing
+
+`pip install sast` creates a `sast` command (Linux/macOS: `<prefix>/bin/sast`,
+Windows: `<prefix>\Scripts\sast.exe`). For the command to be found, that
+directory must be on your `PATH`. The most reliable options:
+
+```bash
+pipx install sast      # recommended — isolated, always on PATH (all OSes)
+```
+
+or inside a virtual environment:
+
+```bash
+python -m venv .venv
+# Linux/macOS:
+source .venv/bin/activate
+# Windows:
+.venv\Scripts\activate
+pip install sast
+```
+
+**If `sast` is "not recognized" / "command not found"** after a
+`pip install --user`, the per-user scripts dir isn't on your `PATH`. Either
+add it, or just run it as a module — this always works regardless of `PATH`:
+
+```bash
+python -m sast .
+```
+
+- **Windows** per-user scripts dir: `%APPDATA%\Python\Python3XX\Scripts`
+- **Linux/macOS** per-user scripts dir: `~/.local/bin`
+
 ## What it scans
 
 - **SAST** across 17+ languages with taint tracking
@@ -32,7 +64,8 @@ download happens at install time** (that keeps offline/CI installs reliable).
 On first invocation the launcher:
 
 1. Detects your OS → `linux` / `macos` / `windows`.
-2. Fetches the manifest from `https://insom.ai/static/downloads/sast/manifest.json`.
+2. Fetches `https://insom.ai/static/downloads/plugin_manifest.json` and reads
+   its `sast.<os>` entry (filename + sha256 + version).
 3. Downloads the matching binary and verifies its `sha256`.
 4. Caches it under your per-user cache directory and `exec`s it.
 
@@ -87,21 +120,23 @@ the build.
 
 ## Server-side manifest format
 
-The launcher expects this JSON at `SAST_MANIFEST_URL`:
+By default the launcher reads insom.ai's `plugin_manifest.json`, whose `sast`
+section lists the latest per-OS build:
 
 ```json
 {
-  "version": "2026.06.04-abc1234",
-  "platforms": {
-    "linux":   { "url": "sast-linux-x64",       "sha256": "<hex>" },
-    "macos":   { "url": "sast-macos-x64",        "sha256": "<hex>" },
-    "windows": { "url": "sast-windows-x64.exe",  "sha256": "<hex>" }
+  "sast": {
+    "windows": { "filename": "insomnia-sast-windows-x64.exe", "sha256": "<hex>", "version": "1.0.0", "uploaded": "<iso8601>" },
+    "linux":   { "filename": "insomnia-sast-linux-x64",       "sha256": "<hex>", "version": "1.0.0", "uploaded": "<iso8601>" },
+    "macos":   null
   }
 }
 ```
 
-`url` may be relative to the manifest URL or absolute. `sha256` is optional but
-enforced when present.
+`filename` is resolved relative to the manifest URL. The launcher also accepts
+a simpler `{ "version", "platforms": { "<os>": { "url", "sha256" } } }` shape if
+you self-host via `SAST_MANIFEST_URL`. `sha256` is enforced when present; a
+`null` OS entry means that build isn't published yet.
 
 ---
 
