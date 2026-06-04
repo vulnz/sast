@@ -1,7 +1,7 @@
-"""`ins` entry point: ensure the engine binary is present, then hand off to it.
+"""`sast` entry point: ensure the engine binary is present, then hand off to it.
 
-All arguments after `ins` are passed straight through to the underlying SAST
-binary, so `ins --help`, `ins <path> --sarif`, etc. behave exactly like the
+All arguments after `sast` are passed straight through to the underlying SAST
+binary, so `sast --help`, `sast <path> --sarif`, etc. behave exactly like the
 native CLI. A few launcher-only subcommands are intercepted first.
 """
 
@@ -19,15 +19,15 @@ from ._download import (
     ensure_binary,
 )
 
-_LAUNCHER_HELP = f"""ins {__version__} — launcher for the Insomnia SAST engine
+_LAUNCHER_HELP = f"""sast {__version__} — launcher for the Insomnia SAST engine
 
 Usage:
-  ins [SAST-ARGS...]      Run the SAST engine (downloads it on first use).
-  ins self-update         Re-download the latest engine binary.
-  ins self-version        Show launcher + cached-engine versions.
-  ins self-where          Print the path to the cached engine binary.
+  sast [SAST-ARGS...]     Run the SAST engine (downloads it on first use).
+  sast self-update        Re-download the latest engine binary.
+  sast self-version       Show launcher + cached-engine versions.
+  sast self-where         Print the path to the cached engine binary.
 
-Everything else is forwarded to the engine. Try:  ins --help
+Everything else is forwarded to the engine. Try:  sast --help
 """
 
 
@@ -50,7 +50,7 @@ def main(argv: list[str] | None = None) -> int:
             ensure_binary(force=True)
             return 0
         if cmd == "self-version":
-            print(f"ins launcher {__version__}")
+            print(f"sast launcher {__version__}")
             print(f"engine        {current_version() or '(not yet installed)'}")
             return 0
         if cmd == "self-where":
@@ -63,7 +63,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         return _run_engine(argv)
     except DownloadError as exc:
-        print(f"ins: {exc}", file=sys.stderr)
+        print(f"sast: {exc}", file=sys.stderr)
         return 3
 
 

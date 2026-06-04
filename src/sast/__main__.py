@@ -1,4 +1,4 @@
-"""Allow `python -m ins` to behave like the `ins` console script."""
+"""Allow `python -m sast` to behave like the `sast` console script."""
 
 from .cli import main
 

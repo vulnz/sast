@@ -3,14 +3,14 @@
 Pure stdlib (urllib/hashlib/platform) so the wheel has zero runtime deps and
 stays a few KB. The hosted layout this expects on insom.ai:
 
-    https://insom.ai/static/downloads/ins/manifest.json
+    https://insom.ai/static/downloads/sast/manifest.json
 
     {
       "version": "2026.06.04-abc1234",
       "platforms": {
-        "linux":   {"url": ".../ins-linux-x64",       "sha256": "<hex>"},
-        "macos":   {"url": ".../ins-macos-x64",        "sha256": "<hex>"},
-        "windows": {"url": ".../ins-windows-x64.exe",  "sha256": "<hex>"}
+        "linux":   {"url": ".../sast-linux-x64",       "sha256": "<hex>"},
+        "macos":   {"url": ".../sast-macos-x64",        "sha256": "<hex>"},
+        "windows": {"url": ".../sast-windows-x64.exe",  "sha256": "<hex>"}
       }
     }
 
@@ -28,10 +28,10 @@ import sys
 import urllib.request
 from urllib.parse import urljoin
 
-# Override with the INS_MANIFEST_URL env var (handy for staging / self-hosting).
-DEFAULT_MANIFEST_URL = "https://insom.ai/static/downloads/ins/manifest.json"
+# Override with the SAST_MANIFEST_URL env var (handy for staging / self-hosting).
+DEFAULT_MANIFEST_URL = "https://insom.ai/static/downloads/sast/manifest.json"
 
-_USER_AGENT = "ins-launcher"
+_USER_AGENT = "sast-launcher"
 
 
 class DownloadError(RuntimeError):
@@ -39,7 +39,7 @@ class DownloadError(RuntimeError):
 
 
 def manifest_url() -> str:
-    return os.environ.get("INS_MANIFEST_URL", DEFAULT_MANIFEST_URL).strip()
+    return os.environ.get("SAST_MANIFEST_URL", DEFAULT_MANIFEST_URL).strip()
 
 
 def detect_platform() -> str:
@@ -53,7 +53,7 @@ def detect_platform() -> str:
         return "windows"
     raise DownloadError(
         f"Unsupported operating system: {platform.system()!r}. "
-        "ins ships binaries for Linux, macOS and Windows only."
+        "sast ships binaries for Linux, macOS and Windows only."
     )
 
 
@@ -65,21 +65,21 @@ def _arch_is_supported() -> bool:
 
 def cache_dir() -> str:
     """Per-user cache directory for the downloaded binary, by OS convention."""
-    override = os.environ.get("INS_CACHE_DIR")
+    override = os.environ.get("SAST_CACHE_DIR")
     if override:
         return override
     system = platform.system().lower()
     if system.startswith("win"):
         base = os.environ.get("LOCALAPPDATA") or os.path.expanduser("~\\AppData\\Local")
-        return os.path.join(base, "ins", "bin")
+        return os.path.join(base, "sast", "bin")
     if system == "darwin":
-        return os.path.expanduser("~/Library/Application Support/ins/bin")
+        return os.path.expanduser("~/Library/Application Support/sast/bin")
     base = os.environ.get("XDG_CACHE_HOME") or os.path.expanduser("~/.cache")
-    return os.path.join(base, "ins", "bin")
+    return os.path.join(base, "sast", "bin")
 
 
 def binary_path() -> str:
-    name = "ins.exe" if detect_platform() == "windows" else "ins"
+    name = "sast.exe" if detect_platform() == "windows" else "sast"
     return os.path.join(cache_dir(), name)
 
 
@@ -145,7 +145,7 @@ def ensure_binary(*, force: bool = False, quiet: bool = False) -> str:
     """Return the path to the cached binary, downloading it if needed.
 
     With force=True the binary is re-fetched even if present (used by
-    `ins self-update`).
+    `sast self-update`).
     """
     path = binary_path()
     if os.path.exists(path) and not force:
@@ -154,13 +154,13 @@ def ensure_binary(*, force: bool = False, quiet: bool = False) -> str:
     if not _arch_is_supported():
         _warn(
             quiet,
-            f"warning: CPU architecture {platform.machine()!r} has no native ins build; "
+            f"warning: CPU architecture {platform.machine()!r} has no native sast build; "
             "attempting the x86-64 binary.",
         )
 
     plat = detect_platform()
-    _warn(quiet, "ins: fetching the SAST engine (first run)..." if not force
-          else "ins: updating the SAST engine...")
+    _warn(quiet, "sast: fetching the SAST engine (first run)..." if not force
+          else "sast: updating the SAST engine...")
 
     manifest = _load_manifest()
     entry = manifest.get("platforms", {}).get(plat)
@@ -192,7 +192,7 @@ def ensure_binary(*, force: bool = False, quiet: bool = False) -> str:
     except OSError:
         pass
 
-    _warn(quiet, f"ins: installed engine {version or '(unversioned)'} -> {path}")
+    _warn(quiet, f"sast: installed engine {version or '(unversioned)'} -> {path}")
     return path
 
 

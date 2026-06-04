@@ -2,7 +2,7 @@ MIT License (launcher only)
 
 Copyright (c) 2026 CQR Cybersecurity LLC
 
-This license applies ONLY to the source code in this repository (the "ins"
+This license applies ONLY to the source code in this repository (the "sast"
 launcher). It does NOT apply to the Insomnia SAST engine binary that the
 launcher downloads at runtime, which is proprietary software of CQR
 Cybersecurity LLC and is provided under separate terms.

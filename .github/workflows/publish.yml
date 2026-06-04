@@ -1,9 +1,9 @@
-# Build the `ins` launcher wheel + sdist and publish to PyPI.
+# Build the `sast` launcher wheel + sdist and publish to PyPI.
 #
 # Publishing uses PyPI Trusted Publishing (OIDC) — no API token/secret needed.
 # It is configured under the project's "Publishing" settings on PyPI with:
-#     Owner:        <your GitHub org/user>     (e.g. CQR-Cybersecurity)
-#     Repository:   ins
+#     Owner:        vulnz
+#     Repository:   sast
 #     Workflow:     publish.yml                 (this file)
 #     Environment:  pypi
 #
@@ -49,7 +49,7 @@ jobs:
     # publisher form (here: "pypi").
     environment:
       name: pypi
-      url: https://pypi.org/p/ins
+      url: https://pypi.org/p/sast
     permissions:
       id-token: write  # required for Trusted Publishing (OIDC)
     steps:
