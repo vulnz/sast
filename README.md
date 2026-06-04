@@ -39,6 +39,16 @@ On first invocation the launcher:
 Because the engine lives on the server, new engine releases reach users
 without republishing the pip package.
 
+### Staying on the latest engine
+
+After the first download the cached binary is reused for speed. At most once
+per day (`SAST_UPDATE_INTERVAL`, default `86400` seconds) `sast` also asks
+insom.ai whether a newer engine is published and, if so, upgrades itself
+automatically. Update checks **fail open** — if you're offline or the server
+is unreachable, the cached binary keeps working. Set `SAST_UPDATE_INTERVAL=0`
+to pin the cached version, or run `sast self-update` to force the latest at
+any time.
+
 ## Launcher commands
 
 | Command             | What it does                                  |
@@ -50,10 +60,11 @@ without republishing the pip package.
 
 ## Environment variables
 
-| Variable             | Purpose                                                       |
-|----------------------|---------------------------------------------------------------|
-| `SAST_MANIFEST_URL`  | Override the manifest URL (staging / self-hosting)            |
-| `SAST_CACHE_DIR`     | Override where the binary is cached                           |
+| Variable                | Purpose                                                    |
+|-------------------------|------------------------------------------------------------|
+| `SAST_MANIFEST_URL`     | Override the manifest URL (staging / self-hosting)         |
+| `SAST_CACHE_DIR`        | Override where the binary is cached                        |
+| `SAST_UPDATE_INTERVAL`  | Seconds between auto-update checks (default `86400`; `0` disables) |
 
 Default cache locations:
 
