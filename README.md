@@ -51,11 +51,29 @@ python -m sast .
 
 ## What it scans
 
-- **SAST** across 17+ languages with taint tracking
-- **Secrets** detection (entropy + vendor rule packs)
-- **IaC / cloud misconfiguration** (Terraform, K8s, Docker, …)
-- **SCA** — known-vulnerable dependencies
-- Output as **HTML**, **JSON**, or **SARIF** (drops straight into GitHub code scanning)
+A single self-contained binary — **no Python dependencies and no external
+tools shelled out** (no semgrep / trivy / bandit; everything runs in-engine):
+
+- **Code vulnerabilities** — a native tree-sitter **AST + taint engine** across
+  **16 languages** (Python, JavaScript, TypeScript, Java, Go, Ruby, PHP, C,
+  C++, C#, Rust, Kotlin, Scala, Swift, Lua, Shell) plus regex coverage for
+  40+, with **intra- *and* cross-file taint** that follows `include` / `require`
+  / `import` relationships (source in one file → sink in another).
+- **Secrets & API keys** — entropy + 230+ vendor rule packs, with optional
+  **live validation** that labels each secret *validated* / *invalid* / *not
+  validated* against its provider.
+- **Vulnerable dependencies (SCA)** — OSV / advisory matching across npm, pip,
+  Maven, Go, Composer, Cargo and more (covers `npm audit`-style checks).
+- **Vulnerable JS libraries** — RetireJS-style detection of bundled jQuery,
+  AngularJS, lodash, Bootstrap, Handlebars, … versions with known CVEs.
+- **CMS vulnerable components** — WordPress / Joomla / Drupal / Magento
+  plugins, themes and core matched against **~24,000 advisories**.
+- **Web shells & malware** — PHP / ASP(X) / JSP / shellcode signatures
+  (c99, r57, WSO, China Chopper, …), obfuscated payloads, reverse shells, and
+  suspicious **double-extension uploads** (`shell.php.jpg`).
+- **IaC / cloud misconfiguration** — Terraform, Kubernetes, Docker, CloudFormation, …
+- Output as **HTML**, **TXT**, **JSON** or **SARIF 2.1.0** (drops straight into
+  GitHub code scanning), with CI exit-code gating via `--fail-on`.
 
 ## How it works
 
