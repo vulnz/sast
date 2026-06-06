@@ -9,10 +9,17 @@ speed with no Python dependencies.
 
 ```bash
 pip install sast
-sast .                 # scan the current directory
-sast ./src --sarif report.sarif
-sast --help            # full engine options
+sast .                       # scan the current directory
+sast ./src -f sarif -o out   # write a SARIF report into ./out
+sast . --fail-on high        # exit non-zero on high+ findings (CI gating)
+sast --help                  # full engine options
 ```
+
+**Coverage at a glance:** 1,750+ FP-validated rules · native AST + cross-file
+taint on **16 languages** (regex for 40+) · 230+ secret rule packs with **live
+key validation** · SCA across 8+ ecosystems + container/OS packages · ~24,000
+CMS advisories · web-shell & malware signatures · IaC (Terraform/K8s/Docker/
+CloudFormation) · **SARIF / JSON / HTML**.
 
 > Supports Linux, macOS and Windows (x86-64). On Apple Silicon the macOS
 > binary runs under Rosetta.
@@ -75,6 +82,51 @@ tools shelled out** (no semgrep / trivy / bandit; everything runs in-engine):
 - Output as **HTML**, **TXT**, **JSON** or **SARIF 2.1.0** (drops straight into
   GitHub code scanning), with CI exit-code gating via `--fail-on`.
 
+## How it compares
+
+Most **free** scanners do exactly one thing — Bandit is Python-only SAST,
+Checkov is IaC-only, Gitleaks is secrets-only, Trivy is SCA/containers. The
+all-in-one platforms (Semgrep, Snyk) put taint analysis, secrets and SCA behind
+a **paid** tier. `sast` does the whole lot in a single **free** binary — no
+external tools shelled out, runs **offline**.
+
+| Capability | **sast** (Insomnia) | Semgrep | Snyk | Bandit | Checkov | Trivy | Gitleaks |
+|---|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| Multi-language SAST + taint | ✅ 16 langs | ◑ taint = paid | ✅ | ◑ Python | ✗ | ✗ | ✗ |
+| Cross-file taint (include/import) | ✅ | ◑ | ◑ | ✗ | ✗ | ✗ | ✗ |
+| Secrets + **live key validation** | ✅ | ◑ paid | ◑ | ✗ | ✗ | ◑ | ◑ no val. |
+| Dependencies / SCA (CVEs) | ✅ | ◑ paid | ✅ | ✗ | ◑ | ✅ | ✗ |
+| Vulnerable JS libs (RetireJS) | ✅ | ✗ | ◑ | ✗ | ✗ | ✗ | ✗ |
+| CMS CVEs (WordPress/Joomla/…) | ✅ ~24k | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ |
+| Web-shell & malware detection | ✅ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ |
+| IaC / cloud misconfig | ✅ | ✅ | ✅ | ✗ | ✅ | ✅ | ✗ |
+| Container / OS-package CVEs | ✅ | ✗ | ✅ | ✗ | ✗ | ✅ | ✗ |
+| SARIF output | ✅ | ✅ | ✅ | ◑ | ✅ | ✅ | ✅ |
+| Editor plugins (VS Code/JetBrains) | ✅ | ✅ | ✅ | ✗ | ✗ | ✗ | ✗ |
+| Git pre-push gate | ✅ | ◑ | ◑ | ✗ | ✗ | ✗ | ◑ |
+| Single offline binary, no extra tools | ✅ | ✗ | ✗ | ✗ | ✗ | ✅ | ✅ |
+| **Free** (no paywalled core) | ✅ | ◑ | ✗ | ✅ | ✅ | ✅ | ✅ |
+
+✅ built-in · ◑ partial / paid tier · ✗ not offered
+
+> Reflects each tool's free/open-source offering as of mid-2026; paid platform
+> tiers may add capabilities. In short: instead of stitching together
+> Bandit + Gitleaks + Trivy + Checkov (and paying Semgrep/Snyk for taint + SCA),
+> you get one free engine that covers all of it.
+
+## Editor & CI integrations
+
+Same engine, everywhere:
+
+- **VS Code** — the *Insomnia SAST* extension: inline hints as you type, a
+  **Vulnerabilities** panel, an **All Issues** dashboard, mark-as-false-positive,
+  and a git **pre-push gate**. Install from the VS Code Marketplace or
+  <https://insom.ai/plugin>.
+- **JetBrains** (PyCharm / PhpStorm / WebStorm / GoLand / IntelliJ) and
+  **Visual Studio 2022** — in beta.
+- **CI** — `pip install sast && sast . -f sarif -o out --fail-on high`, then
+  upload `out/*.sarif` to GitHub code scanning.
+
 ## How it works
 
 `pip install sast` lays down only a few KB of pure-Python launcher — **no
@@ -127,10 +179,10 @@ Default cache locations:
 
 ```yaml
 - run: pip install sast
-- run: sast . --sarif results.sarif --fail-on high
+- run: sast . -f sarif -o sarif-out --fail-on high
 - uses: github/codeql-action/upload-sarif@v3
   with:
-    sarif_file: results.sarif
+    sarif_file: sarif-out      # the action accepts a directory of .sarif files
 ```
 
 `sast` exits non-zero when findings meet your `--fail-on` threshold, failing
