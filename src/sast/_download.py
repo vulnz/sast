@@ -45,9 +45,13 @@ def manifest_url() -> str:
 
 
 def detect_platform() -> str:
-    """Map the host OS to a manifest platform key (linux / macos / windows)."""
+    """Map the host OS+arch to a manifest platform key
+    (linux / linux-arm64 / macos / windows)."""
     system = platform.system().lower()
+    machine = platform.machine().lower()
     if system.startswith("linux"):
+        if machine in {"aarch64", "arm64"}:
+            return "linux-arm64"
         return "linux"
     if system == "darwin":
         return "macos"
@@ -60,9 +64,16 @@ def detect_platform() -> str:
 
 
 def _arch_is_supported() -> bool:
-    """The hosted binaries are x86-64 only (for now). arm64 macs run via Rosetta."""
+    """Which host CPUs have a native engine. x86-64 everywhere; arm64 macs run
+    via Rosetta; linux arm64 (aarch64) now has a native build too."""
     machine = platform.machine().lower()
-    return machine in {"x86_64", "amd64", "x64"} or platform.system().lower() == "darwin"
+    if machine in {"x86_64", "amd64", "x64"}:
+        return True
+    if platform.system().lower() == "darwin":
+        return True
+    if platform.system().lower().startswith("linux") and machine in {"aarch64", "arm64"}:
+        return True
+    return False
 
 
 def cache_dir() -> str:
