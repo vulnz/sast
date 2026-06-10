@@ -141,26 +141,62 @@ def _mark_checked() -> None:
         pass
 
 
+def _ssl_context(*, insecure: bool = False):
+    """Build a TLS context that actually has a CA store.
+
+    macOS python.org / pyenv builds ship without a usable system CA store, so
+    the stdlib default context raises CERTIFICATE_VERIFY_FAILED on the very
+    first HTTPS call. We prefer certifi's Mozilla CA bundle (a declared
+    dependency) and fall back to the stdlib default when it is unavailable.
+    """
+    import ssl
+
+    if insecure:
+        return ssl._create_unverified_context()
+    try:
+        import certifi
+
+        return ssl.create_default_context(cafile=certifi.where())
+    except Exception:
+        return ssl.create_default_context()
+
+
 def _http_get(url: str, *, binary: bool) -> bytes:
     import ssl
 
     req = urllib.request.Request(url, headers={"User-Agent": _USER_AGENT})
-    try:
-        with urllib.request.urlopen(req, timeout=120) as resp:  # noqa: S310 (https only by default)
+    insecure = os.environ.get("SAST_INSECURE_TLS", "").strip().lower() in {"1", "true", "yes"}
+
+    def _open(ctx) -> bytes:
+        with urllib.request.urlopen(req, timeout=120, context=ctx) as resp:  # noqa: S310 (https only)
             return resp.read()
-    except ssl.SSLCertVerificationError as exc:
-        hint = ""
-        if platform.system().lower() == "darwin":
-            # Classic python.org-build issue: the bundled OpenSSL has no CA store
-            # until the user runs the post-install "Install Certificates.command".
-            hint = (
-                "\nOn macOS this usually means your Python install has no CA "
-                "certificates. Run:\n"
-                '  /Applications/Python\\ 3.x/Install\\ Certificates.command\n'
-                "or:  pip install --upgrade certifi"
-            )
-        raise DownloadError(f"TLS certificate verification failed for {url}: {exc}{hint}") from exc
+
+    try:
+        return _open(_ssl_context(insecure=insecure))
     except Exception as exc:  # urllib raises a zoo of exception types
+        # urllib wraps the TLS error in URLError, so unwrap to find the cause.
+        reason = getattr(exc, "reason", None)
+        is_cert = isinstance(exc, ssl.SSLCertVerificationError) or isinstance(
+            reason, ssl.SSLCertVerificationError
+        )
+        if is_cert and not insecure:
+            # Retry once with certifi explicitly — covers a stale/empty system
+            # CA store even if our primary context fell back to the default.
+            try:
+                import certifi
+
+                return _open(ssl.create_default_context(cafile=certifi.where()))
+            except Exception:
+                pass
+            hint = (
+                "\nTLS certificate verification failed — your Python has no usable CA "
+                "store (common on macOS python.org / pyenv builds). Fix with ONE of:\n"
+                "  pip install --upgrade certifi\n"
+                "  /Applications/Python\\ 3.x/Install\\ Certificates.command   (macOS)\n"
+                "Or, on a trusted network only, set SAST_INSECURE_TLS=1 to skip "
+                "verification."
+            )
+            raise DownloadError(f"Could not fetch {url}: {exc}{hint}") from exc
         raise DownloadError(f"Could not fetch {url}: {exc}") from exc
 
 
