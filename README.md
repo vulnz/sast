@@ -1,5 +1,10 @@
 # sast
 
+[![PyPI](https://img.shields.io/pypi/v/sast?color=7c3aed&label=pip%20install%20sast)](https://pypi.org/project/sast/)
+[![Homebrew](https://img.shields.io/badge/brew-vulnz%2Fsast-2563eb)](https://github.com/vulnz/homebrew-sast)
+[![Platforms](https://img.shields.io/badge/platforms-Windows%20%7C%20macOS%20%7C%20Linux-16a34a)](https://insom.ai)
+[![Rules](https://img.shields.io/badge/rules-1%2C750%2B-b45309)](https://insom.ai)
+
 **Free, fast static application security testing for CI/CD.**
 
 `sast` is a tiny launcher. Installing it is instant; the first time you run it,
