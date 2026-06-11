@@ -46,7 +46,7 @@ def manifest_url() -> str:
 
 def detect_platform() -> str:
     """Map the host OS+arch to a manifest platform key
-    (linux / linux-arm64 / macos / windows)."""
+    (linux / linux-arm64 / macos / macos-arm64 / windows)."""
     system = platform.system().lower()
     machine = platform.machine().lower()
     if system.startswith("linux"):
@@ -54,6 +54,11 @@ def detect_platform() -> str:
             return "linux-arm64"
         return "linux"
     if system == "darwin":
+        # Apple Silicon needs the native arm64 build; the "macos" key is the
+        # Intel (x86_64) binary, which only runs on arm Macs via Rosetta and
+        # errors with "Bad CPU type" when Rosetta is absent.
+        if machine in {"arm64", "aarch64"}:
+            return "macos-arm64"
         return "macos"
     if system.startswith("win"):
         return "windows"
@@ -213,7 +218,29 @@ def _load_manifest() -> dict:
     return data
 
 
+def _plat_candidates(plat: str) -> list[str]:
+    """Preferred manifest keys for `plat`, in priority order.
+
+    Apple Silicon prefers the native arm64 build but can fall back to the
+    Intel ("macos") binary via Rosetta if no arm64 build is published yet.
+    """
+    if plat == "macos-arm64":
+        return ["macos-arm64", "macos"]
+    return [plat]
+
+
 def _resolve_entry(manifest: dict, plat: str, murl: str) -> dict:
+    """Resolve a download entry for `plat`, trying architecture fallbacks."""
+    last_err: DownloadError | None = None
+    for cand in _plat_candidates(plat):
+        try:
+            return _resolve_one(manifest, cand, murl)
+        except DownloadError as exc:
+            last_err = exc
+    raise last_err or DownloadError(f"Manifest has no download entry for platform {plat!r}.")
+
+
+def _resolve_one(manifest: dict, plat: str, murl: str) -> dict:
     """Return {url, sha256, identity} for `plat`, handling both manifest shapes.
 
     * insom.ai `plugin_manifest.json`:  {"sast": {"<plat>": {filename, sha256, version, uploaded}}}
