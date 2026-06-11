@@ -5,6 +5,14 @@ fetches the OS-matched Insomnia SAST engine from insom.ai on first run
 (checksum-verified, cached, auto-updating). This file tracks the launcher;
 engine capabilities are noted where they change what you get.
 
+## 1.6.5 — 2026-06-11
+- **Intel macOS, the real fix.** The launcher now resolves the Intel build from
+  the `macos-x64` manifest key (where CI actually publishes it) instead of the
+  stale legacy `macos` key, so Intel Macs get the genuine x86_64 engine. Apple
+  Silicon resolves `macos-arm64` first, then `macos-x64` (Rosetta). Combined with
+  the v1.6.4 Mach-O arch check, an Intel Mac can no longer end up with an arm64
+  binary.
+
 ## 1.6.4 — 2026-06-11
 - **Intel macOS fix.** The launcher now verifies the downloaded engine's CPU
   architecture (Mach-O) before caching or running it. An arm64 binary cannot run

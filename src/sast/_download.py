@@ -54,12 +54,13 @@ def detect_platform() -> str:
             return "linux-arm64"
         return "linux"
     if system == "darwin":
-        # Apple Silicon -> native arm64 build. Intel (x86_64) -> the "macos" key,
-        # which is the x86_64 binary that runs natively on Intel (and on Apple
-        # Silicon via Rosetta). An arm64 binary will NOT run on an Intel Mac.
+        # The CI publishes arch-specific keys: "macos-x64" (Intel) and
+        # "macos-arm64" (Apple Silicon). The legacy bare "macos" key is stale and
+        # only used as a last-resort fallback (see _plat_candidates). An arm64
+        # binary will NOT run on an Intel Mac, so Intel must resolve to x64.
         if machine in {"arm64", "aarch64"}:
             return "macos-arm64"
-        return "macos"
+        return "macos-x64"
     if system.startswith("win"):
         return "windows"
     raise DownloadError(
@@ -221,11 +222,15 @@ def _load_manifest() -> dict:
 def _plat_candidates(plat: str) -> list[str]:
     """Preferred manifest keys for `plat`, in priority order.
 
-    Apple Silicon prefers the native arm64 build but can fall back to the
-    Intel ("macos") binary via Rosetta if no arm64 build is published yet.
+    Apple Silicon prefers native arm64, then the Intel x64 build (runs via
+    Rosetta), then the legacy bare "macos" key. Intel prefers the x64 build, then
+    the legacy "macos" key — but NOT arm64, which cannot run on Intel at all
+    (the downloaded-arch check in _verify_runnable_arch enforces that too).
     """
     if plat == "macos-arm64":
-        return ["macos-arm64", "macos"]
+        return ["macos-arm64", "macos-x64", "macos"]
+    if plat == "macos-x64":
+        return ["macos-x64", "macos"]
     return [plat]
 
 
