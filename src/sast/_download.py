@@ -54,9 +54,9 @@ def detect_platform() -> str:
             return "linux-arm64"
         return "linux"
     if system == "darwin":
-        # Apple Silicon needs the native arm64 build; the "macos" key is the
-        # Intel (x86_64) binary, which only runs on arm Macs via Rosetta and
-        # errors with "Bad CPU type" when Rosetta is absent.
+        # Apple Silicon -> native arm64 build. Intel (x86_64) -> the "macos" key,
+        # which is the x86_64 binary that runs natively on Intel (and on Apple
+        # Silicon via Rosetta). An arm64 binary will NOT run on an Intel Mac.
         if machine in {"arm64", "aarch64"}:
             return "macos-arm64"
         return "macos"
@@ -275,6 +275,62 @@ def _resolve_one(manifest: dict, plat: str, murl: str) -> dict:
     raise DownloadError(f"Manifest has no download entry for platform {plat!r}.")
 
 
+def _macho_arches(blob: bytes) -> set[str]:
+    """CPU arch names inside a Mach-O blob ('x86_64', 'arm64', ...). Handles
+    thin little-endian Mach-O (modern macOS) and fat/universal binaries. Returns
+    an empty set when the blob isn't recognisably Mach-O (then we don't block)."""
+    import struct
+
+    if len(blob) < 8:
+        return set()
+    cpu = {0x01000007: "x86_64", 0x0100000C: "arm64", 7: "i386", 12: "arm"}
+    be = struct.unpack(">I", blob[:4])[0]
+    le = struct.unpack("<I", blob[:4])[0]
+    if be in (0xCAFEBABE, 0xCAFEBABF):  # fat/universal — big-endian header
+        out: set[str] = set()
+        n = struct.unpack(">I", blob[4:8])[0]
+        rec = 20 if be == 0xCAFEBABE else 32
+        off = 8
+        for _ in range(min(n, 32)):
+            if off + 4 > len(blob):
+                break
+            out.add(cpu.get(struct.unpack(">I", blob[off:off + 4])[0], "unknown"))
+            off += rec
+        return out
+    if le in (0xFEEDFACE, 0xFEEDFACF):  # thin Mach-O, little-endian
+        return {cpu.get(struct.unpack("<I", blob[4:8])[0], "unknown")}
+    return set()
+
+
+def _verify_runnable_arch(blob: bytes, quiet: bool) -> None:
+    """Refuse a macOS binary the host CPU cannot execute, BEFORE we cache/exec it.
+
+    An arm64 Mach-O cannot run on an Intel Mac at all (Rosetta only runs x86 on
+    Apple Silicon, not the reverse) — exec'ing it gives the cryptic
+    `OSError: [Errno 86] Bad CPU type in executable`. We turn that into a clear,
+    actionable message and avoid caching a binary that can never run.
+    Apple Silicon can run BOTH arm64 (native) and x86_64 (Rosetta), so it never
+    hard-fails here.
+    """
+    if platform.system().lower() != "darwin":
+        return
+    arches = _macho_arches(blob)
+    if not arches:
+        return  # not Mach-O / unrecognised — don't block
+    host = platform.machine().lower()
+    if host in {"x86_64", "amd64", "x64"} and "x86_64" not in arches:
+        raise DownloadError(
+            "The downloaded macOS engine is "
+            + "/".join(sorted(arches))
+            + ", but this is an Intel (x86_64) Mac, which cannot run it "
+            "(errno 86 'Bad CPU type in executable').\n"
+            "This is a server-side build issue — the macos-x64 download is currently "
+            "serving the wrong architecture — not anything you can fix locally.\n"
+            "Until the Intel build is republished, run sast on Apple Silicon, Linux or "
+            "Windows, or build the engine from source (github.com/vulnz/sast)."
+        )
+
+
 def _verify_sha256(blob: bytes, expected: str) -> None:
     actual = hashlib.sha256(blob).hexdigest()
     if actual.lower() != expected.lower():
@@ -344,6 +400,10 @@ def ensure_binary(*, force: bool = False, quiet: bool = False) -> str:
         _verify_sha256(blob, sha)
     else:
         _warn(quiet, "warning: manifest provided no sha256 — skipping integrity check.")
+
+    # Never cache/exec a macOS binary this CPU cannot run — fail clearly instead
+    # of leaving a wrong-arch binary that errors with "Bad CPU type" on every run.
+    _verify_runnable_arch(blob, quiet)
 
     os.makedirs(cache_dir(), exist_ok=True)
     tmp = path + ".part"

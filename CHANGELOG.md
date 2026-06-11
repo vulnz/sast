@@ -5,6 +5,15 @@ fetches the OS-matched Insomnia SAST engine from insom.ai on first run
 (checksum-verified, cached, auto-updating). This file tracks the launcher;
 engine capabilities are noted where they change what you get.
 
+## 1.6.4 — 2026-06-11
+- **Intel macOS fix.** The launcher now verifies the downloaded engine's CPU
+  architecture (Mach-O) before caching or running it. An arm64 binary cannot run
+  on an Intel Mac, and exec'ing it gave a cryptic `OSError: [Errno 86] Bad CPU
+  type in executable`; you now get a clear, actionable message instead, and a
+  binary the host can't run is never cached. (The underlying cause — the
+  `macos-x64` download serving an arm64 build — is fixed on the build/CI side so
+  Intel Macs get a real x86_64 engine again.)
+
 ## 1.6.2 — 2026-06-11
 - Engine updated to **v1.8.1**: inter-procedural taint across files, gap-fill
   rule packs (SQLi / SSRF / stored-XSS / IaC), Trivy-style container CVE matching
