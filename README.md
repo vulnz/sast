@@ -16,6 +16,7 @@
   <a href="https://pypi.org/project/sast/"><img src="https://img.shields.io/pypi/v/sast?color=7c3aed&label=pip%20install%20sast&logo=python&logoColor=white" alt="PyPI"></a>
   <a href="https://github.com/vulnz/homebrew-sast"><img src="https://img.shields.io/badge/brew-vulnz%2Fsast-2563eb?logo=homebrew&logoColor=white" alt="Homebrew"></a>
   <a href="https://www.npmjs.com/package/sastai"><img src="https://img.shields.io/npm/v/sastai?color=cb3837&label=npm%20i%20-g%20sastai&logo=npm&logoColor=white" alt="npm"></a>
+  <a href="https://github.com/vulnz/sast/pkgs/container/sast"><img src="https://img.shields.io/badge/ghcr.io-vulnz%2Fsast-2496ED?logo=docker&logoColor=white" alt="Docker image"></a>
   <img src="https://img.shields.io/badge/platforms-Windows%20%7C%20macOS%20%7C%20Linux-16a34a" alt="Platforms">
   <img src="https://img.shields.io/badge/rules-1%2C750%2B-b45309" alt="Rules">
   <img src="https://img.shields.io/badge/price-free-16a34a" alt="Free">
@@ -140,6 +141,54 @@ python -m sast .
 
 - **Windows** per-user scripts dir: `%APPDATA%\Python\Python3XX\Scripts`
 - **Linux/macOS** per-user scripts dir: `~/.local/bin`
+
+## Run with Docker
+
+A prebuilt, multi-arch (amd64 + arm64) image ships the engine baked in — nothing
+to install, ideal for CI/CD. Image: **`ghcr.io/vulnz/sast`**
+([package page](https://github.com/vulnz/sast/pkgs/container/sast)).
+
+```bash
+docker pull ghcr.io/vulnz/sast:latest
+```
+
+**Scan local source code** — mount your project at `/src`:
+
+```bash
+docker run --rm -v "$PWD:/src" ghcr.io/vulnz/sast:latest /src --fail-on high
+```
+
+```powershell
+# Windows PowerShell
+docker run --rm -v "${PWD}:/src" ghcr.io/vulnz/sast:latest /src --fail-on high
+```
+
+**Scan a remote repository** — pass a URL and the engine shallow-clones, scans,
+and cleans up (no `git clone`, no volume mount needed):
+
+```bash
+docker run --rm ghcr.io/vulnz/sast:latest https://github.com/owner/repo --fail-on high
+# private repo:
+docker run --rm -e GITHUB_TOKEN=ghp_xxx ghcr.io/vulnz/sast:latest https://github.com/owner/private-repo
+```
+
+**Write reports** back to your working directory (SARIF for code scanning, HTML to read):
+
+```bash
+docker run --rm -v "$PWD:/src" ghcr.io/vulnz/sast:latest /src -f sarif,html -o /src/reports
+```
+
+In **GitHub Actions** the image works as a container step:
+
+```yaml
+- name: SAST
+  run: docker run --rm -v "$PWD:/src" ghcr.io/vulnz/sast:latest /src -f sarif -o /src/out --fail-on high
+- uses: github/codeql-action/upload-sarif@v3
+  with: { sarif_file: out }
+```
+
+> Tip: pin a version (`ghcr.io/vulnz/sast:1.8.2`) for reproducible builds. The
+> image runs as a non-root user and needs no API key, account, or telemetry.
 
 ## What it scans
 
