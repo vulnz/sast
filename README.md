@@ -65,9 +65,13 @@ sast --help                  # full engine options
 ```
 
 <p align="center">
-  <img src="https://insom.ai/static/img/ss_cve.png" width="49%" alt="SAST findings — CVE / SCA view">
-  &nbsp;
-  <img src="https://insom.ai/static/img/ss_http.png" width="49%" alt="Inline vulnerability detail">
+  <a href="https://insom.ai/static/video/insomnia-sdlc-overview.mp4" title="Watch the Insomnia SAST overview">
+    <img src="https://insom.ai/static/img/characters/02-insomnia-man-sitting-computer.png" width="62%" alt="Watch the Insomnia SAST overview video">
+  </a>
+  <br>
+  <a href="https://insom.ai/static/video/insomnia-sdlc-overview.mp4"><b>▶ Watch the overview video</b></a>
+  &nbsp;·&nbsp;
+  <a href="https://insom.ai/en/sdlc">Read the SDLC walkthrough →</a>
 </p>
 
 **Coverage at a glance:** 1,750+ FP-validated rules · native AST + cross-file
