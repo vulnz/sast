@@ -158,16 +158,22 @@ to install, ideal for CI/CD. Available on both registries:
 docker pull dominators/sast:latest        # or: ghcr.io/vulnz/sast:latest
 ```
 
-**Scan local source code** — mount your project at `/src`:
+**Scan local source code — report saved to your folder.** Mount your project at
+`/src`; the reports land in **`./reports` on your machine** (not inside the
+container, which `--rm` discards):
 
 ```bash
-docker run --rm -v "$PWD:/src" dominators/sast:latest /src --fail-on high
+docker run --rm -v "$PWD:/src" dominators/sast:latest /src -f html,json,sarif -o /src/reports --fail-on high
 ```
 
 ```powershell
 # Windows PowerShell
-docker run --rm -v "${PWD}:/src" dominators/sast:latest /src --fail-on high
+docker run --rm -v "${PWD}:/src" dominators/sast:latest /src -f html,json,sarif -o /src/reports --fail-on high
 ```
+
+`-o /src/reports` writes to the mounted directory, so `./reports/` on the host
+holds the HTML/JSON/SARIF output. `--fail-on high` exits non-zero on high+
+findings (CI gating). Drop `-f`/`-o` for a quick terminal-only scan.
 
 **Scan a remote repository** — pass a URL and the engine shallow-clones, scans,
 and cleans up (no `git clone`, no volume mount needed):
@@ -176,12 +182,6 @@ and cleans up (no `git clone`, no volume mount needed):
 docker run --rm dominators/sast:latest https://github.com/owner/repo --fail-on high
 # private repo:
 docker run --rm -e GITHUB_TOKEN=ghp_xxx dominators/sast:latest https://github.com/owner/private-repo
-```
-
-**Write reports** back to your working directory (SARIF for code scanning, HTML to read):
-
-```bash
-docker run --rm -v "$PWD:/src" dominators/sast:latest /src -f sarif,html -o /src/reports
 ```
 
 In **GitHub Actions** the image works as a container step:
