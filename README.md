@@ -1,11 +1,54 @@
-# sast
+<p align="center">
+  <a href="https://insom.ai/en/plugin">
+    <img src="https://insom.ai/static/img/logo.png" width="96" alt="Insomnia">
+  </a>
+</p>
 
-[![PyPI](https://img.shields.io/pypi/v/sast?color=7c3aed&label=pip%20install%20sast)](https://pypi.org/project/sast/)
-[![Homebrew](https://img.shields.io/badge/brew-vulnz%2Fsast-2563eb)](https://github.com/vulnz/homebrew-sast)
-[![Platforms](https://img.shields.io/badge/platforms-Windows%20%7C%20macOS%20%7C%20Linux-16a34a)](https://insom.ai)
-[![Rules](https://img.shields.io/badge/rules-1%2C750%2B-b45309)](https://insom.ai)
+<h1 align="center">sast — by Insomnia</h1>
 
-**Free, fast static application security testing for CI/CD.**
+<p align="center">
+  <b>Free, fast static application security testing for your terminal &amp; CI/CD.</b><br>
+  SAST + taint · secrets with live key validation · SCA/CVEs · IaC · CMS &amp; web-shell/malware —
+  <i>one self-contained binary</i>, the same engine in your IDE and your build.
+</p>
+
+<p align="center">
+  <a href="https://pypi.org/project/sast/"><img src="https://img.shields.io/pypi/v/sast?color=7c3aed&label=pip%20install%20sast&logo=python&logoColor=white" alt="PyPI"></a>
+  <a href="https://github.com/vulnz/homebrew-sast"><img src="https://img.shields.io/badge/brew-vulnz%2Fsast-2563eb?logo=homebrew&logoColor=white" alt="Homebrew"></a>
+  <a href="https://www.npmjs.com/package/sastai"><img src="https://img.shields.io/npm/v/sastai?color=cb3837&label=npm%20i%20-g%20sastai&logo=npm&logoColor=white" alt="npm"></a>
+  <img src="https://img.shields.io/badge/platforms-Windows%20%7C%20macOS%20%7C%20Linux-16a34a" alt="Platforms">
+  <img src="https://img.shields.io/badge/rules-1%2C750%2B-b45309" alt="Rules">
+  <img src="https://img.shields.io/badge/price-free-16a34a" alt="Free">
+</p>
+
+<h3 align="center">Get the editor plugins — same engine, same results</h3>
+
+<p align="center">
+  <a href="https://marketplace.visualstudio.com/items?itemName=InsomniaSAST.insomnia">
+    <img src="https://img.shields.io/badge/VS%20Code-Install-007ACC?style=for-the-badge&logo=visualstudiocode&logoColor=white" alt="VS Code Marketplace">
+  </a>
+  &nbsp;
+  <a href="https://open-vsx.org/extension/InsomniaSAST/insomnia">
+    <img src="https://img.shields.io/badge/Open%20VSX-Install-A60EE5?style=for-the-badge&logo=eclipseide&logoColor=white" alt="Open VSX (VSCodium / Cursor / Windsurf / Gitpod)">
+  </a>
+  &nbsp;
+  <a href="https://plugins.jetbrains.com/plugin/32214-insomnia-sast">
+    <img src="https://img.shields.io/badge/JetBrains-Install-000000?style=for-the-badge&logo=jetbrains&logoColor=white" alt="JetBrains Marketplace">
+  </a>
+  &nbsp;
+  <a href="https://github.com/marketplace/actions/sast-by-insomnia">
+    <img src="https://img.shields.io/badge/GitHub%20Action-Use-2088FF?style=for-the-badge&logo=githubactions&logoColor=white" alt="GitHub Marketplace Action">
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://insom.ai/en/plugin"><b>Plugin home</b></a> ·
+  <a href="https://insom.ai/en/sdlc"><b>CI/CD &amp; SDLC</b></a> ·
+  <a href="https://insom.ai/en/downloads">Direct downloads</a> ·
+  <a href="https://insom.ai/api/plugin/manifest">Manifest</a>
+</p>
+
+---
 
 `sast` is a tiny launcher. Installing it is instant; the first time you run it,
 it downloads a self-contained SAST engine binary that matches your operating
@@ -20,6 +63,12 @@ sast . --fail-on high        # exit non-zero on high+ findings (CI gating)
 sast --help                  # full engine options
 ```
 
+<p align="center">
+  <img src="https://insom.ai/static/img/ss_cve.png" width="49%" alt="SAST findings — CVE / SCA view">
+  &nbsp;
+  <img src="https://insom.ai/static/img/ss_http.png" width="49%" alt="Inline vulnerability detail">
+</p>
+
 **Coverage at a glance:** 1,750+ FP-validated rules · native AST + cross-file
 taint on **16 languages** (regex for 40+) · 230+ secret rule packs with **live
 key validation** · SCA across 8+ ecosystems + container/OS packages · ~24,000
@@ -31,15 +80,46 @@ CloudFormation) · **SARIF / JSON / HTML**.
 
 ## Installing
 
-`pip install sast` creates a `sast` command (Linux/macOS: `<prefix>/bin/sast`,
-Windows: `<prefix>\Scripts\sast.exe`). For the command to be found, that
-directory must be on your `PATH`. The most reliable options:
+Pick whichever fits your stack — every method lands the **same engine**.
+
+| Method | Command |
+|---|---|
+| **pip / pipx** (any OS, Python 3.8+) | `pip install sast` &nbsp;·&nbsp; `pipx install sast` *(recommended — isolated, always on PATH)* |
+| **Homebrew** (macOS / Linux) | `brew tap vulnz/sast && brew install sast` |
+| **npm** (global launcher) | `sudo npm install -g sastai` |
+| **Debian / Ubuntu** (signed apt repo) | see below — then `sudo apt-get install sast` |
+| **Direct binary** (Fedora / Arch / Alpine / air-gapped) | `curl -sSL https://insom.ai/latest/sast/linux -o /usr/local/bin/sast` |
+
+### Debian / Ubuntu — signed apt repo
 
 ```bash
-pipx install sast      # recommended — isolated, always on PATH (all OSes)
+curl -sSL https://insom.ai/apt/public-key.asc | sudo gpg --yes --dearmor \
+  -o /usr/share/keyrings/insomnia-archive-keyring.gpg
+echo "deb [signed-by=/usr/share/keyrings/insomnia-archive-keyring.gpg] https://insom.ai/apt stable main" \
+  | sudo tee /etc/apt/sources.list.d/insomnia.list
+sudo apt-get update && sudo apt-get install -y sast
 ```
 
-or inside a virtual environment:
+### Direct download from insom.ai (no package manager)
+
+A single self-contained binary — handy for air-gapped boxes and minimal CI images:
+
+```bash
+curl -sSL https://insom.ai/latest/sast/linux  -o /usr/local/bin/sast   # Linux x86-64
+# curl -sSL https://insom.ai/latest/sast/macos -o /usr/local/bin/sast   # macOS
+chmod +x /usr/local/bin/sast
+sast --version
+```
+
+Windows: download `https://insom.ai/latest/sast/windows`, or grab any build from the
+[**downloads page**](https://insom.ai/en/downloads). Files + SHA-256 are listed in the
+[manifest](https://insom.ai/api/plugin/manifest).
+
+### Notes on the pip install
+
+`pip install sast` creates a `sast` command (Linux/macOS: `<prefix>/bin/sast`,
+Windows: `<prefix>\Scripts\sast.exe`). For the command to be found, that
+directory must be on your `PATH`. Inside a virtual environment:
 
 ```bash
 python -m venv .venv
@@ -125,11 +205,17 @@ Same engine, everywhere:
 
 - **VS Code** — the *Insomnia SAST* extension: inline hints as you type, a
   **Vulnerabilities** panel, an **All Issues** dashboard, mark-as-false-positive,
-  and a git **pre-push gate**. Install from the VS Code Marketplace or
-  <https://insom.ai/plugin>.
-- **JetBrains** (PyCharm / PhpStorm / WebStorm / GoLand / IntelliJ) and
-  **Visual Studio 2022** — in beta.
-- **CI** — `pip install sast && sast . -f sarif -o out --fail-on high`, then
+  and a git **pre-push gate**.
+  → [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=InsomniaSAST.insomnia)
+  · [Open VSX](https://open-vsx.org/extension/InsomniaSAST/insomnia) (VSCodium / Cursor / Windsurf / Gitpod)
+- **JetBrains** (PyCharm / PhpStorm / WebStorm / GoLand / IntelliJ IDEA / RubyMine /
+  CLion / Rider / DataGrip) — one plugin for all of them.
+  → [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/32214-insomnia-sast)
+- **Visual Studio 2022** and more entry points on the
+  [plugin page](https://insom.ai/en/plugin).
+- **GitHub Action** — drop SAST into any pipeline in one line, SARIF straight to the
+  Security tab: [`SAST by Insomnia`](https://github.com/marketplace/actions/sast-by-insomnia).
+- **CI (any)** — `pip install sast && sast . -f sarif -o out --fail-on high`, then
   upload `out/*.sarif` to GitHub code scanning.
 
 ## How it works
