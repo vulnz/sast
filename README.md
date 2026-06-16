@@ -145,44 +145,46 @@ python -m sast .
 ## Run with Docker
 
 A prebuilt, multi-arch (amd64 + arm64) image ships the engine baked in — nothing
-to install, ideal for CI/CD. Image: **`ghcr.io/vulnz/sast`**
-([package page](https://github.com/vulnz/sast/pkgs/container/sast)).
+to install, ideal for CI/CD. Available on both registries:
+
+- **Docker Hub:** [`dominators/sast`](https://hub.docker.com/r/dominators/sast)
+- **GHCR:** [`ghcr.io/vulnz/sast`](https://github.com/vulnz/sast/pkgs/container/sast)
 
 ```bash
-docker pull ghcr.io/vulnz/sast:latest
+docker pull dominators/sast:latest        # or: ghcr.io/vulnz/sast:latest
 ```
 
 **Scan local source code** — mount your project at `/src`:
 
 ```bash
-docker run --rm -v "$PWD:/src" ghcr.io/vulnz/sast:latest /src --fail-on high
+docker run --rm -v "$PWD:/src" dominators/sast:latest /src --fail-on high
 ```
 
 ```powershell
 # Windows PowerShell
-docker run --rm -v "${PWD}:/src" ghcr.io/vulnz/sast:latest /src --fail-on high
+docker run --rm -v "${PWD}:/src" dominators/sast:latest /src --fail-on high
 ```
 
 **Scan a remote repository** — pass a URL and the engine shallow-clones, scans,
 and cleans up (no `git clone`, no volume mount needed):
 
 ```bash
-docker run --rm ghcr.io/vulnz/sast:latest https://github.com/owner/repo --fail-on high
+docker run --rm dominators/sast:latest https://github.com/owner/repo --fail-on high
 # private repo:
-docker run --rm -e GITHUB_TOKEN=ghp_xxx ghcr.io/vulnz/sast:latest https://github.com/owner/private-repo
+docker run --rm -e GITHUB_TOKEN=ghp_xxx dominators/sast:latest https://github.com/owner/private-repo
 ```
 
 **Write reports** back to your working directory (SARIF for code scanning, HTML to read):
 
 ```bash
-docker run --rm -v "$PWD:/src" ghcr.io/vulnz/sast:latest /src -f sarif,html -o /src/reports
+docker run --rm -v "$PWD:/src" dominators/sast:latest /src -f sarif,html -o /src/reports
 ```
 
 In **GitHub Actions** the image works as a container step:
 
 ```yaml
 - name: SAST
-  run: docker run --rm -v "$PWD:/src" ghcr.io/vulnz/sast:latest /src -f sarif -o /src/out --fail-on high
+  run: docker run --rm -v "$PWD:/src" dominators/sast:latest /src -f sarif -o /src/out --fail-on high
 - uses: github/codeql-action/upload-sarif@v3
   with: { sarif_file: out }
 ```

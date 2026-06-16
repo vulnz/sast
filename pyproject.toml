@@ -21,7 +21,15 @@ readme = "README.md"
 requires-python = ">=3.8"
 license = { text = "Proprietary" }
 authors = [{ name = "CQR Cybersecurity LLC" }]
-keywords = ["sast", "security", "static-analysis", "sca", "sarif", "ci", "devsecops"]
+keywords = [
+    "sast", "static-analysis", "static-application-security-testing",
+    "security", "security-scanner", "vulnerability-scanner", "vulnerability",
+    "sca", "software-composition-analysis", "dependency-scanner", "cve",
+    "secret-scanning", "secret-detection", "secrets", "taint-analysis",
+    "sarif", "code-scanning", "appsec", "devsecops", "cicd", "ci", "owasp",
+    "semgrep-alternative", "snyk-alternative", "bandit-alternative",
+    "iac-scanning", "malware-detection", "web-shell", "insomnia", "insom",
+]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Environment :: Console",
