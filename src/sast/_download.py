@@ -102,6 +102,21 @@ def binary_path() -> str:
     return os.path.join(cache_dir(), name)
 
 
+def clear_cache() -> str:
+    """Delete the downloaded engine binary + version markers.
+
+    ``pip uninstall sast`` removes the launcher package but NOT the engine binary
+    the launcher fetched at runtime (pip only tracks files it installed), so the
+    cached executable lingers. ``sast self-clean`` removes it. Returns the path.
+    """
+    import shutil
+
+    d = cache_dir()
+    if os.path.isdir(d):
+        shutil.rmtree(d, ignore_errors=True)
+    return d
+
+
 def _version_marker() -> str:
     return os.path.join(cache_dir(), ".version")
 

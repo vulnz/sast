@@ -16,6 +16,7 @@ from . import __version__
 from ._download import (
     DownloadError,
     binary_path,
+    clear_cache,
     current_version,
     ensure_binary,
 )
@@ -27,6 +28,10 @@ Usage:
   sast self-update        Re-download the latest engine binary.
   sast self-version       Show launcher + cached-engine versions.
   sast self-where         Print the path to the cached engine binary.
+  sast self-clean         Delete the cached engine binary (frees disk; it is
+                          re-downloaded on next run).
+  sast self-uninstall     Delete the cached engine, then tell you how to remove
+                          the launcher package itself.
 
 Everything else is forwarded to the engine. Try:  sast --help
 """
@@ -81,6 +86,18 @@ def main(argv: list[str] | None = None) -> int:
             return 0
         if cmd == "self-where":
             print(binary_path())
+            return 0
+        if cmd in ("self-clean", "self-uninstall"):
+            removed = clear_cache()
+            print(f"sast: removed cached engine at {removed}")
+            if cmd == "self-uninstall":
+                print(
+                    "sast: launcher package not removed (pip can't uninstall "
+                    "itself mid-run). Finish with one of:\n"
+                    "  pip uninstall sast\n"
+                    "  pipx uninstall sast\n"
+                    "  brew uninstall sast"
+                )
             return 0
         if cmd in ("self-help", "--launcher-help"):
             print(_LAUNCHER_HELP)
