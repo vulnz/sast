@@ -5,6 +5,20 @@ fetches the OS-matched Insomnia SAST engine from insom.ai on first run
 (checksum-verified, cached, auto-updating). This file tracks the launcher;
 engine capabilities are noted where they change what you get.
 
+## 1.7.0 — 2026-10-10
+- **Engine refreshed to the v3.4.9 build** (`2026.10.10-d64ba9e`). No launcher
+  changes are required to get it — the launcher is version-independent and
+  auto-updates the cached engine from the insom.ai manifest — this bump simply
+  advertises the new engine and its benchmark. Run `sast self-update` to pull it
+  immediately.
+- **Engine capabilities (what you get):** scanner module count 1443 → **1472**
+  (+16 modern attack classes: PortSwigger Top-10 2024–2025 DAST — parser
+  differentials, ORM leak, HTTP/2 Rapid Reset precondition, SSRF→cloud-metadata,
+  postMessage/service-worker/CSP-gadget/error-SSTI; OWASP API Top-10 — OpenAPI
+  security lint, business-flow abuse, SSE/gRPC-web discovery; the 2025 MCP CVE
+  cluster; and a CI/CD + AI/ML SAST rule pack). Current SAST benchmark ≈ 98.8%
+  coverage / 96.7% recall with a 0.0% false-positive gate on the reference suite.
+
 ## 1.6.5 — 2026-06-11
 - **Intel macOS, the real fix.** The launcher now resolves the Intel build from
   the `macos-x64` manifest key (where CI actually publishes it) instead of the

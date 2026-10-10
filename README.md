@@ -80,6 +80,10 @@ key validation** · SCA across 8+ ecosystems + container/OS packages · ~24,000
 CMS advisories · web-shell & malware signatures · IaC (Terraform/K8s/Docker/
 CloudFormation) · **SARIF / JSON / HTML**.
 
+**Benchmark (reference suite):** ≈ **98.8% SAST coverage / 96.7% recall** at a
+**0.0% false-positive gate**, verified against known-vulnerability labs across
+all supported languages. Engine build `2026.10.10` (v3.4.9).
+
 > Supports Linux, macOS and Windows (x86-64). On Apple Silicon the macOS
 > binary runs under Rosetta.
 
