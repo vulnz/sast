@@ -5,6 +5,16 @@ fetches the OS-matched Insomnia SAST engine from insom.ai on first run
 (checksum-verified, cached, auto-updating). This file tracks the launcher;
 engine capabilities are noted where they change what you get.
 
+## 1.7.1 — 2026-10-10
+- **Engine refreshed to the v3.5.0 build.** Two things free CLI users get: the
+  new **JEV calibrated triage classifier** (a fast "System One" confirmed/
+  needs-review/rejected verdict with a per-finding p_real), and a fix that
+  **bundles the 3.4.9 CI/CD + AI/ML SAST rule pack into the standalone binary** —
+  those 18 rules (GitHub Actions `github.event`-in-`run:`, `pull_request_target`
+  PR-checkout, `curl|bash`, and AI/ML sinks like `pickle`/`torch.load`/`yaml.load`,
+  LangChain shell tools, `eval` of LLM output) were missing from the frozen
+  engine before and now fire. Run `sast self-update` to pull it.
+
 ## 1.7.0 — 2026-10-10
 - **Engine refreshed to the v3.4.9 build** (`2026.10.10-d64ba9e`). No launcher
   changes are required to get it — the launcher is version-independent and
