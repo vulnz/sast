@@ -1,0 +1,26 @@
+{
+  "name": "sast",
+  "version": "1.7.1",
+  "description": "Static Application Security Testing (SAST), cross-file AST taint analysis across 16+ languages, secret detection with live key validation, SCA dependency CVE scanning, IaC misconfiguration checks, CMS/web-shell detection, and AI-assisted triage & remediation powered by the Insomnia SAST library.",
+  "author": {
+    "name": "CQR Cybersecurity LLC",
+    "url": "https://insom.ai"
+  },
+  "homepage": "https://insom.ai/en/plugin",
+  "repository": "https://github.com/vulnz/sast",
+  "license": "Proprietary",
+  "keywords": [
+    "sast",
+    "security",
+    "static-analysis",
+    "taint-analysis",
+    "vulnerability-scanner",
+    "secrets",
+    "sca",
+    "cve",
+    "iac",
+    "sarif",
+    "devsecops",
+    "insomnia"
+  ]
+}

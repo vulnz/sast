@@ -37,6 +37,10 @@
     <img src="https://img.shields.io/badge/JetBrains-Install-000000?style=for-the-badge&logo=jetbrains&logoColor=white" alt="JetBrains Marketplace">
   </a>
   &nbsp;
+  <a href="#claude-code-plugin">
+    <img src="https://img.shields.io/badge/Claude%20Code-Plugin-D97757?style=for-the-badge&logo=anthropic&logoColor=white" alt="Claude Code Plugin">
+  </a>
+  &nbsp;
   <a href="https://github.com/marketplace/actions/sast-by-insomnia">
     <img src="https://img.shields.io/badge/GitHub%20Action-Use-2088FF?style=for-the-badge&logo=githubactions&logoColor=white" alt="GitHub Marketplace Action">
   </a>
@@ -272,10 +276,45 @@ Same engine, everywhere:
   → [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/32214-insomnia-sast)
 - **Visual Studio 2022** and more entry points on the
   [plugin page](https://insom.ai/en/plugin).
+- **Claude Code** — native Claude Code plugin (`sast`) with slash commands (`/sast:scan`, `/sast:diff`, `/sast:secrets`, `/sast:sca`, `/sast:triage`, `/sast:fix`), subagents (`@agent-sast:security-auditor`, `@agent-sast:remediation-engineer`), and a `PostToolUse` edit hook.
+  → [Jump to Claude Code Plugin instructions](#claude-code-plugin)
 - **GitHub Action** — drop SAST into any pipeline in one line, SARIF straight to the
   Security tab: [`SAST by Insomnia`](https://github.com/marketplace/actions/sast-by-insomnia).
 - **CI (any)** — `pip install sast && sast . -f sarif -o out --fail-on high`, then
   upload `out/*.sarif` to GitHub code scanning.
+
+## Claude Code Plugin
+
+This repository also serves as a **Claude Code plugin & marketplace** (`sast`), integrating the Insomnia SAST engine directly into Claude Code.
+
+### Install in Claude Code
+
+```bash
+claude plugin marketplace add vulnz/sast
+claude plugin install sast@insomnia-sast
+```
+
+Or from inside an interactive Claude Code session:
+
+```text
+/plugin marketplace add vulnz/sast
+/plugin install sast@insomnia-sast
+```
+
+### Slash Commands (Skills) & Subagents
+
+| Command | Description |
+|---|---|
+| `/sast:scan [path-or-url]` | Full SAST + AST/taint (16+ languages) + secrets + IaC + SCA scan |
+| `/sast:diff [path]` | Fast incremental SAST scan of git modified, staged, and untracked files (`--changed`) |
+| `/sast:secrets [path]` | Scan working tree and `--git-history` for hardcoded credentials with live provider key validation |
+| `/sast:sca [path]` | Audit dependencies (OSV CVEs), dependency confusion, bundled JS libs, CMS plugins, and `--licenses` |
+| `/sast:triage [path]` | Build STRIDE `--threat-model` and triage findings against the 0-FP real-only gate |
+| `/sast:fix [path]` | Remediate vulnerabilities (`--remediation`) and re-verify with `sast --changed` |
+
+- **`@agent-sast:security-auditor`** — Runs `sast`, traces source-to-sink dataflows in source files, and produces prioritized vulnerability reports.
+- **`@agent-sast:remediation-engineer`** — Crafts minimal security patches and re-runs `sast` to verify each fix.
+- **Lifecycle Hook (`PostToolUse`)** — Instant secret tripwire on `Write|Edit` (set `SAST_SCAN_ON_EDIT=1` to also run single-file SAST checks on every edit).
 
 ## How it works
 
