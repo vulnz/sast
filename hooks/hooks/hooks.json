@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"${CLAUDE_PLUGIN_ROOT}/scripts/post_edit_check.py\" --scan-on-edit \"${user_config.scan_on_edit}\""
+          }
+        ]
+      }
+    ]
+  }
+}
