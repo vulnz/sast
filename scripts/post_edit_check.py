@@ -1,20 +1,19 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-post_edit_check.py — Lightweight Claude Code PostToolUse hook for the `sast` plugin.
+post_edit_check.py — Lightweight Claude Code PostToolUse hook for the `insomnia-sast` plugin.
 
 Runs after `Write` or `Edit` tool calls:
   1. Performs an instant (<25ms) check on the modified file for high-confidence
      hardcoded credentials or private keys so accidental secret leaks are flagged
      immediately during coding.
-  2. When `SAST_SCAN_ON_EDIT=1` is set in the environment, runs a single-file
-     incremental scan using the `sast` library (`--files-from`).
+  2. When `--scan-on-edit true` is passed (via `userConfig.scan_on_edit`), runs a
+     single-file incremental scan using the bundled `sast_runner.py` script.
 """
 
 from __future__ import annotations
 
 import json
-import os
 import re
 import subprocess
 import sys
@@ -24,13 +23,12 @@ from pathlib import Path
 # High-confidence secret patterns for instant in-session feedback
 _SECRET_PATTERNS = [
     ("AWS Access Key ID", re.compile(r"\b(?:AKIA|ASIA)[0-9A-Z]{16}\b")),
-    ("Anthropic API Key", re.compile(r"\bsk-ant-api03-[A-Za-z0-9\-_]{40,}\b")),
-    ("OpenAI API Key", re.compile(r"\bsk-(?:proj|live)-[A-Za-z0-9\-_]{32,}\b")),
-    ("GitHub Personal Access Token", re.compile(r"\bgh[pousr]_[A-Za-z0-9]{36,}\b")),
-    ("GitHub Fine-Grained PAT", re.compile(r"\bgithub_pat_[A-Za-z0-9_]{50,}\b")),
-    ("Slack Token", re.compile(r"\bxox[baprs]-[0-9]{10,13}-[0-9]{10,13}-[A-Za-z0-9]{24,}\b")),
-    ("Google API Key", re.compile(r"\bAIza[0-9A-Za-z\-_]{35}\b")),
-    ("Stripe Live Secret Key", re.compile(r"\bsk_live_[0-9a-zA-Z]{24,}\b")),
+    ("API Key Prefix", re.compile(r"\bsk-(?:ant|proj|live)-[A-Za-z0-9\-_]{32,}\b")),
+    ("SCM Personal Access Token", re.compile(r"\bgh[pousr]_[A-Za-z0-9]{36,}\b")),
+    ("Fine-Grained PAT", re.compile(r"\bgithub_pat_[A-Za-z0-9_]{50,}\b")),
+    ("Workspace Bot Token", re.compile(r"\bxox[baprs]-[0-9]{10,13}-[0-9]{10,13}-[A-Za-z0-9]{24,}\b")),
+    ("Cloud API Key", re.compile(r"\bAIza[0-9A-Za-z\-_]{35}\b")),
+    ("Payment Live Key", re.compile(r"\bsk_live_[0-9a-zA-Z]{24,}\b")),
     ("Private Key Block", re.compile(r"-----BEGIN (?:RSA |EC |OPENSSH |DSA |PGP )?PRIVATE KEY-----")),
 ]
 
@@ -44,6 +42,15 @@ def _is_test_or_detector_file(path: Path) -> bool:
     name = path.name.lower()
     if name.startswith("test_") or name.endswith("_test.py") or "detector" in name or "pattern" in name:
         return True
+    return False
+
+
+def _scan_on_edit_enabled(argv: list[str]) -> bool:
+    for idx, arg in enumerate(argv):
+        if arg == "--scan-on-edit" and idx + 1 < len(argv):
+            return argv[idx + 1].strip().lower() in ("1", "true", "yes")
+        if arg.startswith("--scan-on-edit="):
+            return arg.split("=", 1)[1].strip().lower() in ("1", "true", "yes")
     return False
 
 
@@ -72,29 +79,28 @@ def main() -> int:
             alerts = []
             for label, pat in _SECRET_PATTERNS:
                 for match in pat.finditer(content):
-                    token = match.group(0)
-                    # Ignore obvious sequential placeholders
-                    if "123456" in token or "ABCDEF" in token or "xxxxxx" in token.lower():
+                    candidate = match.group(0)
+                    if "123456" in candidate or "ABCDEF" in candidate or "xxxxxx" in candidate.lower():
                         continue
                     line_no = content.count("\n", 0, match.start()) + 1
                     alerts.append(f"  - {file_path.name}:{line_no}: Potential {label} detected")
             if alerts:
                 sys.stderr.write(
-                    "[sast] Warning — potential hardcoded secret(s) detected in edited file:\n"
+                    "[insomnia-sast] Warning — potential hardcoded credential(s) detected in edited file:\n"
                     + "\n".join(alerts[:5])
-                    + "\nRun `/sast:secrets` to validate and inspect.\n"
+                    + "\nRun `/insomnia-sast:secrets` to inspect and remediate.\n"
                 )
     except Exception:
         pass
 
-    # 2. Optional full single-file SAST pass when SAST_SCAN_ON_EDIT=1
-    if os.environ.get("SAST_SCAN_ON_EDIT") == "1":
+    # 2. Optional single-file SAST pass when userConfig.scan_on_edit is enabled
+    if _scan_on_edit_enabled(sys.argv[1:]):
         runner = Path(__file__).resolve().parent / "sast_runner.py"
         if runner.is_file():
             try:
                 with tempfile.NamedTemporaryFile("w", delete=False, suffix=".txt", encoding="utf-8") as tmp:
                     tmp.write(str(file_path) + "\n")
-                    list_file = tmp.name
+                    list_file = Path(tmp.name)
                 try:
                     subprocess.run(
                         [
@@ -102,7 +108,7 @@ def main() -> int:
                             str(runner),
                             str(file_path.parent),
                             "--files-from",
-                            list_file,
+                            str(list_file),
                             "--no-sca",
                             "--no-report",
                             "--quiet",
@@ -112,10 +118,7 @@ def main() -> int:
                         check=False,
                     )
                 finally:
-                    try:
-                        os.unlink(list_file)
-                    except OSError:
-                        pass
+                    list_file.unlink(missing_ok=True)
             except Exception:
                 pass
 

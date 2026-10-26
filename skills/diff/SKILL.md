@@ -1,25 +1,21 @@
 ---
 name: diff
-description: Run a fast incremental SAST security scan on git changed, staged, and untracked files using `sast --changed`. Use before committing, pushing, or opening a pull request, or when reviewing recent code edits for security regressions.
+description: Run a fast incremental SAST security scan on git changed, staged, and untracked files using the bundled Insomnia SAST runner (`--changed`). Use before committing, pushing, or opening a pull request, or when reviewing recent code edits for security regressions.
 argument-hint: "[path] [extra-flags]"
 ---
 
-# SAST Incremental Diff Scan (`/sast:diff`)
+# SAST Incremental Diff Scan (`/insomnia-sast:diff`)
 
-Scan only the files modified, staged, or untracked relative to `git HEAD` using our `sast` library's `--changed` mode (or `--files-from` for a specific file list).
+Scan only the files modified, staged, or untracked relative to `git HEAD` using the bundled `sast_runner.py` script in `--changed` mode.
 
 ## Workflow
 
 1. **Check git working tree status**:
    Verify changed files with `git status --short`.
 2. **Run incremental SAST scan**:
-   Execute the `sast` plugin runner in `--changed` mode:
+   Execute the bundled plugin runner in `--changed` mode:
    ```bash
    python "${CLAUDE_PLUGIN_ROOT}/scripts/sast_runner.py" ${ARGUMENTS:-.} --changed --claude-summary
-   ```
-   Or scan a specific list of files using `--files-from`:
-   ```bash
-   git diff --name-only HEAD | sast . --files-from - --no-banner
    ```
 3. **Review and correlate with the diff**:
    - Cross-reference each finding with `git diff` to distinguish newly introduced vulnerabilities from pre-existing lines in touched files.

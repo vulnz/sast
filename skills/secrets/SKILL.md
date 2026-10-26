@@ -1,17 +1,17 @@
 ---
 name: secrets
-description: Scan source code and git commit history for hardcoded secrets, API keys, tokens, and private keys with live provider validation using `sast --secrets-only` and `--git-history`. Use when auditing for leaked credentials or checking before a release/push.
+description: Scan source code and git commit history for hardcoded secrets, API keys, tokens, and private keys with live provider validation using the bundled Insomnia SAST runner (`--secrets-only` and `--git-history`). Use when auditing for leaked credentials or checking before a release/push.
 argument-hint: "[path] [--git-history] [--noapivalidate]"
 ---
 
-# SAST Secret & Credential Scanner (`/sast:secrets`)
+# SAST Secret & Credential Scanner (`/insomnia-sast:secrets`)
 
-Scan a codebase and its git commit history across 230+ vendor secret rule packs and entropy detectors using our `sast` library, with optional live API key validation against providers.
+Scan a codebase and its git commit history across 230+ vendor secret rule packs and entropy detectors using the bundled `sast_runner.py` script, with optional live API key validation against providers.
 
 ## Commands
 
 ### 1. Fast Working-Tree Secret Scan (with Live Validation)
-By default, `sast` tests detected keys against their provider APIs and labels each secret `VALIDATED` (with proof), `invalid`, or `not validated`:
+By default, the scanner tests detected keys against their provider APIs and labels each secret `VALIDATED` (with proof), `invalid`, or `not validated`:
 
 ```bash
 python "${CLAUDE_PLUGIN_ROOT}/scripts/sast_runner.py" ${ARGUMENTS:-.} --secrets-only --claude-summary
@@ -32,6 +32,6 @@ python "${CLAUDE_PLUGIN_ROOT}/scripts/sast_runner.py" . --secrets-only --git-his
 ```
 
 ## Reporting Guidelines
-- Never echo full live secret values back in plain text; redact the middle characters (e.g., `sk-ant-...9f2a`).
+- Never echo full live secret values back in plain text; redact the middle characters (e.g., `sk-...9f2a`).
 - Clearly highlight any finding marked **`VALIDATED`** as an active credential leak requiring immediate rotation/revocation in addition to code removal.
-- Provide remediation steps: move secrets to environment variables or a secret manager, add patterns to `.gitignore`, and purge git history (`git filter-repo` / BFG) if leaked in commits.
+- Provide remediation steps: move secrets to a dedicated secret manager or configuration store, add patterns to `.gitignore`, and purge git history (`git filter-repo` / BFG) if leaked in commits.
