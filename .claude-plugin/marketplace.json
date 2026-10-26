@@ -1,25 +1,24 @@
 {
-  "name": "insomnia-sast",
-  "description": "Official Claude Code marketplace for the Insomnia SAST plugin (insomnia-sast)",
+  "name": "sast",
+  "description": "Official Claude Code marketplace for the SAST plugin (sast)",
   "owner": {
-    "name": "Insomnia Security (vulnz)",
-    "url": "https://insom.ai"
+    "name": "vulnz",
+    "url": "https://github.com/vulnz/sast"
   },
   "plugins": [
     {
-      "name": "insomnia-sast",
-      "description": "Static Application Security Testing (SAST), cross-file AST taint analysis across 16+ languages, secret detection with live key validation, SCA dependency CVE scanning, IaC misconfiguration checks, CMS/web-shell detection, and security triage & remediation powered by the Insomnia SAST engine.",
-      "version": "1.7.2",
+      "name": "sast",
+      "description": "Static Application Security Testing (SAST), cross-file AST taint analysis across 16+ languages, secret detection with live key validation, SCA dependency CVE scanning, IaC misconfiguration checks, CMS/web-shell detection, and security triage & remediation.",
+      "version": "1.7.3",
       "source": "./",
       "author": {
-        "name": "Insomnia Security (vulnz)",
-        "url": "https://insom.ai"
+        "name": "vulnz",
+        "url": "https://github.com/vulnz/sast"
       },
-      "homepage": "https://insom.ai/en/plugin",
+      "homepage": "https://github.com/vulnz/sast",
       "repository": "https://github.com/vulnz/sast",
       "license": "Proprietary",
       "keywords": [
-        "insomnia-sast",
         "sast",
         "security",
         "static-analysis",

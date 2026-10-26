@@ -1,10 +1,10 @@
 ---
 name: triage
-description: Perform deep vulnerability triage, STRIDE threat modeling, source-to-sink reachability verification, and false-positive filtering using the bundled Insomnia SAST runner (`--threat-model`). Use when evaluating whether SAST findings are exploitable or false positives.
+description: Perform deep vulnerability triage, STRIDE threat modeling, source-to-sink reachability verification, and false-positive filtering using the bundled SAST runner (`--threat-model`). Use when evaluating whether SAST findings are exploitable or false positives.
 argument-hint: "[path] [--all-findings] [--threat-model]"
 ---
 
-# SAST Triage & Threat Modeling (`/insomnia-sast:triage`)
+# SAST Triage & Threat Modeling (`/sast:triage`)
 
 Validate SAST findings, construct a STRIDE threat model of the repository, and separate true exploitable vulnerabilities from false positives using the bundled `sast_runner.py` script.
 

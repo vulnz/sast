@@ -1,12 +1,12 @@
 ---
 name: fix
-description: Remediate vulnerabilities detected by the bundled Insomnia SAST runner (`--remediation`), apply minimal non-breaking security patches, and re-run the scanner to verify the fix eliminates the finding. Use when asked to fix, patch, or remediate SAST findings.
+description: Remediate vulnerabilities detected by the bundled SAST runner (`--remediation`), apply minimal non-breaking security patches, and re-run the scanner to verify the fix eliminates the finding. Use when asked to fix, patch, or remediate SAST findings.
 argument-hint: "[path-or-finding] [options]"
 ---
 
-# SAST Vulnerability Remediation & Verification (`/insomnia-sast:fix`)
+# SAST Vulnerability Remediation & Verification (`/sast:fix`)
 
-Fix security vulnerabilities identified by the bundled Insomnia SAST runner with minimal, surgical code changes and prove the fix works by re-scanning.
+Fix security vulnerabilities identified by the bundled SAST runner with minimal, surgical code changes and prove the fix works by re-scanning.
 
 ## Workflow
 

@@ -1,12 +1,12 @@
 ---
 name: scan
-description: Run Static Application Security Testing (SAST), cross-file AST taint analysis (16+ languages), secret detection with live key validation, SCA dependency CVE checks, IaC misconfiguration scanning, and CMS/web-shell detection using the bundled Insomnia SAST runner. Use when the user asks to scan a repository, directory, or file for security vulnerabilities.
+description: Run Static Application Security Testing (SAST), cross-file AST taint analysis (16+ languages), secret detection with live key validation, SCA dependency CVE checks, IaC misconfiguration scanning, and CMS/web-shell detection using the bundled SAST runner. Use when the user asks to scan a repository, directory, or file for security vulnerabilities.
 argument-hint: "[path] [options]"
 ---
 
-# SAST Full Security Scan (`/insomnia-sast:scan`)
+# SAST Full Security Scan (`/sast:scan`)
 
-Run a comprehensive static application security scan using the bundled Insomnia SAST plugin runner (`${CLAUDE_PLUGIN_ROOT}/scripts/sast_runner.py`).
+Run a comprehensive static application security scan using the bundled SAST plugin runner (`${CLAUDE_PLUGIN_ROOT}/scripts/sast_runner.py`).
 
 ## Capabilities
 - **Code Vulnerabilities (AST + Taint)**: Native AST and intra-/cross-file taint tracking across 16+ languages (Python, JS, TS, Java, Go, Ruby, PHP, C, C++, C#, Rust, Kotlin, Scala, Swift, Lua, Shell) + regex rules across 40+ languages (1,750+ FP-validated rules).
@@ -41,4 +41,4 @@ python "${CLAUDE_PLUGIN_ROOT}/scripts/sast_runner.py" . --scan-tests --claude-su
    - Clickable file and line reference (`path/to/file.ext:line`)
    - Vulnerability class & CWE identifier
    - Dataflow explanation (taint source → sink) or secret validation status
-   - Concrete, minimal remediation guidance (or offer to run `/insomnia-sast:fix`).
+   - Concrete, minimal remediation guidance (or offer to run `/sast:fix`).

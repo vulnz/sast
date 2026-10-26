@@ -1,10 +1,10 @@
 ---
 name: secrets
-description: Scan source code and git commit history for hardcoded secrets, API keys, tokens, and private keys with live provider validation using the bundled Insomnia SAST runner (`--secrets-only` and `--git-history`). Use when auditing for leaked credentials or checking before a release/push.
+description: Scan source code and git commit history for hardcoded secrets, API keys, tokens, and private keys with live provider validation using the bundled SAST runner (`--secrets-only` and `--git-history`). Use when auditing for leaked credentials or checking before a release/push.
 argument-hint: "[path] [--git-history] [--noapivalidate]"
 ---
 
-# SAST Secret & Credential Scanner (`/insomnia-sast:secrets`)
+# SAST Secret & Credential Scanner (`/sast:secrets`)
 
 Scan a codebase and its git commit history across 230+ vendor secret rule packs and entropy detectors using the bundled `sast_runner.py` script, with optional live API key validation against providers.
 

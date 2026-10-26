@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-sast_runner.py — Bundled Claude Code plugin runner for Insomnia SAST.
+sast_runner.py — Bundled Claude Code plugin runner for SAST.
 
 Shipped directly inside the plugin (`${CLAUDE_PLUGIN_ROOT}/scripts/sast_runner.py`).
 Uses the `sast` engine when installed on PATH (`sast` / `python -m sast`) and
@@ -293,7 +293,7 @@ def _format_claude_summary(report_path: Path) -> str:
             counts[sev] += 1
 
     lines: List[str] = []
-    lines.append("## Insomnia SAST Scan Summary")
+    lines.append("## SAST Scan Summary")
     lines.append("")
     lines.append(f"- **Report JSON**: `{report_path}`")
     lines.append(

@@ -1,10 +1,10 @@
 ---
 name: sca
-description: Run Software Composition Analysis (SCA), OSV dependency CVE lookup, dependency-confusion detection, vulnerable JS library detection, CMS plugin/theme CVE matching, and dependency license auditing using the bundled Insomnia SAST runner. Use when auditing third-party packages, lockfiles, containers, or open-source licenses.
+description: Run Software Composition Analysis (SCA), OSV dependency CVE lookup, dependency-confusion detection, vulnerable JS library detection, CMS plugin/theme CVE matching, and dependency license auditing using the bundled SAST runner. Use when auditing third-party packages, lockfiles, containers, or open-source licenses.
 argument-hint: "[path] [--licenses] [--osv-mode both|offline|api]"
 ---
 
-# SAST Dependency CVE & License Audit (`/insomnia-sast:sca`)
+# SAST Dependency CVE & License Audit (`/sast:sca`)
 
 Audit project dependencies, lockfiles, container manifests, bundled JS libraries, CMS components, and open-source licenses using the bundled `sast_runner.py` script.
 

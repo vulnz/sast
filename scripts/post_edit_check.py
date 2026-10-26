@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-post_edit_check.py — Lightweight Claude Code PostToolUse hook for the `insomnia-sast` plugin.
+post_edit_check.py — Lightweight Claude Code PostToolUse hook for the `sast` plugin.
 
 Runs after `Write` or `Edit` tool calls:
   1. Performs an instant (<25ms) check on the modified file for high-confidence
@@ -86,9 +86,9 @@ def main() -> int:
                     alerts.append(f"  - {file_path.name}:{line_no}: Potential {label} detected")
             if alerts:
                 sys.stderr.write(
-                    "[insomnia-sast] Warning — potential hardcoded credential(s) detected in edited file:\n"
+                    "[sast] Warning — potential hardcoded credential(s) detected in edited file:\n"
                     + "\n".join(alerts[:5])
-                    + "\nRun `/insomnia-sast:secrets` to inspect and remediate.\n"
+                    + "\nRun `/sast:secrets` to inspect and remediate.\n"
                 )
     except Exception:
         pass
